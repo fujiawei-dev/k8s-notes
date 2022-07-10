@@ -15,6 +15,22 @@ https://minikube.sigs.k8s.io/docs/start/
 
 ## 预备
 
+Ubuntu 官方提供了镜像，可直接用：
+
+```bash
+multipass launch -n minikube -c 2 -m 8G -d 80G minikube
+```
+
+```bash
+multipass shell minikube
+```
+
+```bash
+multipass exec minikube -- sudo bash
+```
+
+我不理解了，根本没有预装相关软件。。。
+
 ### 安装 Docker
 
 ## 安装
