@@ -11,11 +11,9 @@ toc: true  # 目录
 draft: true  # 草稿
 ---
 
-2022.07.09 不管怎么装就是安装失败，放弃。
-
 > https://docs.rancher.cn/docs/k3s/autok3s/_index
 
-AutoK3s 是用于简化 K3s 集群管理的轻量级工具，您可以使用 AutoK3s 在任何地方运行 K3s 服务。
+AutoK3s 是用于简化 K3s 集群管理的轻量级工具。
 
 ## 关键特性
 
@@ -46,11 +44,9 @@ docker run -d --restart always -v /root/.ssh:/root/.ssh -p 8080:8080 cnrancher/a
 docker run --rm --net host -v /var/run/docker.sock:/var/run/docker.sock cnrancher/autok3s
 ```
 
-都是坑，不每个坑摔倒一次都不能看懂。不要用 Docker，别折腾。
+> 正式部署不要用 Docker。
 
 ### 原生安装
-
-如果您是 MacOS 或者 Linux 系统，您也可以使用以下安装命令，一键安装 AutoK3s（Windows用户请前往 Releases 页面下载对应的程序）。
 
 ```shell
 curl -sS https://rancher-mirror.rancher.cn/autok3s/install.sh  | INSTALL_AUTOK3S_MIRROR=cn sh
@@ -70,23 +66,6 @@ autok3s serve --bind-address 0.0.0.0 --bind-port 18480
 
 ```shell
 /usr/local/bin/autok3s-uninstall.sh
-```
-
-## 升级
-
-如果您使用 Docker 命令一键启动 AutoK3s 本地 UI，从 v0.4.0 升级到 v0.5.1 需要进行如下操作以保证历史数据的迁移。
-
-```shell
-docker cp <old-container>:/root/.autok3s .
-docker rm -f <old-container>
-docker run -itd --restart=unless-stopped -p 8080:8080 -v $PWD/.autok3s:/root/.autok3s cnrancher/autok3s:v0.5.1
-```
-
-在 v0.4.1 以后的版本，可以直接通过 --volumes-from 来保证历史数据的迁移。
-
-```shell
-docker stop <old-container>
-docker run -itd --restart=unless-stopped -p 8080:8080 --volumes-from <old-container> cnrancher/autok3s:v0.5.1
 ```
 
 ## 注意点

@@ -2,8 +2,8 @@
 date: 2022-06-26T23:57:06+08:00
 author: "Rustle Karl"
 
-title: "K3s 简介"
-url:  "posts/docker/docs/k3s/README"  # 永久链接
+title: "K3s 基础教程"
+url:  "posts/k8s/docs/k3s/README"  # 永久链接
 tags: [ "Docker", "README" ]  # 标签
 categories: [ "Docker 学习笔记" ]  # 分类
 
@@ -11,41 +11,91 @@ toc: true  # 目录
 draft: true  # 草稿
 ---
 
+> https://github.com/k3s-io/k3s.git
+
 https://docs.rancher.cn/docs/k3s/_index
 
-## 什么是 K3s?
+K3s 是一个轻量级的 Kubernetes 发行版，它针对边缘计算、物联网等场景进行了高度优化。
 
-K3s 是一个轻量级的 Kubernetes 发行版，它针对边缘计算、物联网等场景进行了高度优化。K3s 有以下增强功能：
+- K3S Server 端最低内存要求：512 MB
+- K3S Agent 端内存最低要求：75MB
+- 磁盘空间最低要求：200 MB
+- 支持的硬件架构：x86_64, ARMv7, ARM64
 
-- 打包为单个二进制文件。
-- 使用基于 sqlite3 的轻量级存储后端作为默认存储机制。同时支持使用 etcd3、MySQL 和 PostgreSQL 作为存储机制。
-- 封装在简单的启动程序中，通过该启动程序处理很多复杂的 TLS 和选项。
-- 默认情况下是安全的，对轻量级环境有合理的默认值。
-- 添加了简单但功能强大的`batteries-included`功能，例如：本地存储提供程序，服务负载均衡器，Helm controller 和 Traefik Ingress controller。
-- 所有 Kubernetes control-plane 组件的操作都封装在单个二进制文件和进程中，使 K3s 具有自动化和管理包括证书分发在内的复杂集群操作的能力。
-- 最大程度减轻了外部依赖性，K3s 仅需要 kernel 和 cgroup 挂载。 K3s 软件包需要的依赖项包括：
-  - containerd
-  - Flannel
-  - CoreDNS
-  - CNI
-  - 主机实用程序（iptables、socat 等）
-  - Ingress controller（Traefik）
-  - 嵌入式服务负载均衡器（service load balancer）
-  - 嵌入式网络策略控制器（network policy controller）
+## 私有镜像配置
 
-## 为什么叫 K3s?
+## 安装
 
-我们希望安装的 Kubernetes 在内存占用方面只是一半的大小。Kubernetes 是一个 10 个字母的单词，简写为 K8s。所以，有 Kubernetes 一半大的东西就是一个 5 个字母的单词，简写为 K3s。K3s 没有全称，也没有官方的发音。
+```shell
+apt install -y curl
+```
 
-## 适用场景
+```shell
+curl -sfL https://get.k3s.io | sh -
+```
 
-K3s 适用于以下场景：
+安装完成之后，服务会自动启动。另外：
 
-- 边缘计算-Edge
-- 物联网-IoT
-- CI
-- Development
-- ARM
-- 嵌入 K8s
+- K3s 服务将被配置为在节点重启后或进程崩溃或被杀死时自动重启。
+- 将安装其他实用程序，包括 kubectl、crictl、ctr、k3s-killall.sh 和 k3s-uninstall.sh。
+- 将 kubeconfig 文件写入到 /etc/rancher/k3s/k3s.yaml，由 K3s 安装的 kubectl 将自动使用该文件
 
-由于运行 K3s 所需的资源相对较少，所以 K3s 也适用于开发和测试场景。在这些场景中，如果开发或测试人员需要对某些功能进行验证，或对某些问题进行重现，那么使用 K3s 不仅能够缩短启动集群的时间，还能够减少集群需要消耗的资源。与此同时，Rancher 中国团队推出了一款针对 K3s 的效率提升工具：**AutoK3s**。只需要输入一行命令，即可快速创建 K3s 集群并添加指定数量的 master 节点和 worker 节点。如需详细了解 AutoK3s，请参考[AutoK3s 功能介绍](https://docs.rancher.cn/docs/k3s/autok3s/_index)。
+## 获取运行状态
+
+```shell
+systemctl status k3s.service
+```
+
+```shell
+journalctl -xeu k3s.service
+```
+
+## 确认是否就绪：
+
+```shell
+sudo kubectl get nodes
+```
+
+## 获取节点 Token
+
+```shell
+cat /var/lib/rancher/k3s/server/node-token
+```
+
+```
+K10fbc1f2145b06ef930a18b2be5867ff161c14652362292b4903dfbfd76107d6e9::server:c5a741686bc1dc85e436777be83a9c00
+```
+
+## 加入工作节点
+
+```shell
+export K3S_URL=https://10.110.155.246:6443
+```
+
+```shell
+export K3S_TOKEN=K10fbc1f2145b06ef930a18b2be5867ff161c14652362292b4903dfbfd76107d6e9::server:c5a741686bc1dc85e436777be83a9c00
+```
+
+```shell
+curl -sfL https://get.k3s.io | sh -
+```
+
+每台计算机必须具有唯一的主机名。如果您的计算机没有唯一的主机名，请传递 K3S_NODE_NAME 环境变量，并为每个节点提供一个有效且唯一的主机名。
+
+```shell
+watch sudo kubectl get nodes
+```
+
+## 卸载
+
+如果您使用安装脚本安装了 K3s，那么在安装过程中会生成一个卸载 K3s 的脚本。
+
+卸载 K3s 会删除集群数据和所有脚本。要使用不同的安装选项重新启动集群，请使用不同的标志重新运行安装脚本。
+
+```shell
+/usr/local/bin/k3s-uninstall.sh
+```
+
+```shell
+/usr/local/bin/k3s-agent-uninstall.sh
+```

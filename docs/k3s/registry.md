@@ -72,16 +72,6 @@ mirrors:
 
 镜像仍将以原始名称存储，所以 crictl image ls 将显示 docker.io/rancher/coredns-coredns:1.6.3 在节点上是可用的，即使镜像是以不同的名字从镜像仓库中拉取的。
 
-### Configs
-
-Configs 部分定义了每个 mirror 的 TLS 和凭证配置。对于每个 mirror，你可以定义auth和/或tls。
-
-```shell
-
-```
-
-## 重启
-
 ```shell
 systemctl restart k3s
 ```
